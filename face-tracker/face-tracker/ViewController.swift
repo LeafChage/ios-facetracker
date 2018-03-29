@@ -32,6 +32,13 @@ class ViewController: UIViewController {
         }
     }
     
+    @IBAction func refreshButtonTapped() {
+        guard ARFaceTrackingConfiguration.isSupported else { return }
+        let configuration = ARFaceTrackingConfiguration()
+        configuration.isLightEstimationEnabled = true
+        session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
+    }
+    
     private var parameters: Dictionary<String, Float> = Dictionary(uniqueKeysWithValues: [
         ("anchorTransform1x1", 0), ("anchorTransform1x2", 0), ("anchorTransform1x3", 0), ("anchorTransform1x4", 0),
         ("anchorTransform2x1", 0), ("anchorTransform2x2", 0), ("anchorTransform2x3", 0), ("anchorTransform2x4", 0),
@@ -61,6 +68,17 @@ class ViewController: UIViewController {
 
         sceneView.delegate = self
         sceneView.session.delegate = self
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(self.udpClose),
+            name: NSNotification.Name.UIApplicationDidEnterBackground,
+            object: nil
+        )
+    }
+    
+    @objc private func udpClose() {
+        self.udp?.close()
     }
 
     override func didReceiveMemoryWarning() {
@@ -203,10 +221,10 @@ extension ViewController: ARSCNViewDelegate {
             if udp.send(data: sendText) {
                 DispatchQueue.main.async { self.udpStatusLabel.text = "Connect" }
             }else{
-                DispatchQueue.main.async { self.parameterText.text = "Not Connect" }
+                DispatchQueue.main.async { self.udpStatusLabel.text = "Not Connect" }
             }
         }else{
-            DispatchQueue.main.async { self.parameterText.text = "Not Connect" }
+            DispatchQueue.main.async { self.udpStatusLabel.text = "Not Connect" }
         }
     }
 }

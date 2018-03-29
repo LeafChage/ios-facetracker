@@ -27,6 +27,9 @@ class MyUDPClient {
         }else{
             return false
         }
-        
+    }
+    
+    public func close() {
+        self.client?.close()
     }
 }
