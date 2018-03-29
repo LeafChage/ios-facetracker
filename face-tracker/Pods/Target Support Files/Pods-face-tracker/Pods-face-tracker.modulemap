@@ -1,0 +1,6 @@
+framework module Pods_face_tracker {
+  umbrella header "Pods-face-tracker-umbrella.h"
+
+  export *
+  module * { export * }
+}
