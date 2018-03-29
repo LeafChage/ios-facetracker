@@ -209,13 +209,12 @@ extension ViewController: ARSCNViewDelegate {
         
         var text = ""
         var sendText = ""
-        for (key, value) in self.parameters {
+        for (key, value) in self.parameters.sorted(by: <) {
             text += key + ":" + String(value) + "\n"
             sendText += key + "=" + String(value) + "&"
         }
-        DispatchQueue.main.async {
-            self.parameterText.text = text
-        }
+        
+        DispatchQueue.main.async { self.parameterText.text = text }
         
         if let udp = self.udp {
             if udp.send(data: sendText) {
