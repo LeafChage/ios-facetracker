@@ -24,6 +24,10 @@ public class UDPServer
 {
       private UdpClient udpServer;
       private Thread thread;
+      private string message;
+      public string Message {
+            get{ return this.message; }
+      }
 
       public UDPServer(int port)
       {
@@ -47,6 +51,8 @@ public class UDPServer
                   byte[] data = this.udpServer.Receive(ref remoteEP);
                   string text = Encoding.ASCII.GetString(data);
                   Debug.Log(text);
+
+                  this.message = text;
             }
       }
 }
@@ -57,10 +63,42 @@ public class UDPServer
 public class AnythingObject {
       private UDPServer server;
       void Start() {
-            server = new UDPServer(3000);
+            this.server = new UDPServer(3000);
       }
+
+      void Update() {
+            var parameters = this.parseSentMessage(this.server.Message());
+            foreach(KeyValuePair<string, float> pair in parameters){
+                  Debug.Log (pair.Key + " " + pair.Value);
+            }
+      }
+
       void OnApplciationQuit() {
-            server.ThreadClose();
+            this.server.ThreadClose();
+      }
+
+      // debug用の情報をパースする
+      private Dictionary<string, float> parseSentMessage(string sentData) {
+          Dictionary<string, float> dict = new Dictionary<string, float>();
+          if (sentData != null || sentData == "")
+          {
+              string[] datas = sentData.Split('&');
+
+              if (datas.Length > 0)
+              {
+                  foreach (string data in datas)
+                  {
+                      string[] d = data.Split('=');
+                      if (d.Length == 2)
+                      {
+                          float value = 0;
+                          float.TryParse(d[1], out value);
+                          dict[d[0]] = value;
+                      }
+                  }
+              }
+          }
+          return dict;
       }
 }
 ```
